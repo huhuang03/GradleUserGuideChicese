@@ -1,0 +1,7 @@
+task hello << {
+    println "Hello from hello!"
+}
+
+hello {
+    println "Hello from hell2!"
+}
