@@ -1,0 +1,131 @@
+task hello << {
+    println 'Hello world!'
+}
+
+// Task depend on other task
+task intro(dependsOn: hello) << {
+    println "I'm Gradle"
+}
+
+
+// Lazy depends on
+task taskX(dependsOn: 'taskY') << {
+    println "I'm taskX"
+}
+
+task taskY << {
+    println "I'm taskY"
+}
+
+// Dynamic creation of a task
+4.times {
+    counter -> 
+    task "task$counter" << {
+        println "I'm task number $counter"
+    }
+}
+
+// Accessing a task via API - adding a dependency
+task0.dependsOn task2, task3
+
+// Accessing a task vi API - adding behavior
+hello.doFirst {
+    println "Hello Venus"
+}
+
+hello.doLast {
+    println "Hello Mars"
+}
+
+// << is a shortname of doLast
+hello << {
+    println "Hello Jupiter" 
+}
+
+// Accessing task as a property of the build script
+task hello1 << {
+    println "Hello world"
+}
+
+hello1 << {
+    println "Greeting from $hello1.name task."
+}
+
+// Adding extra properties to a task
+task myTask {
+    ext.myProperty = "myValue"
+}
+
+task printTaskProperties << {
+    println myTask.myProperty
+}
+
+// Using AntBuiler to execute ant.loadfile target
+task loadfile << {
+    File[] files = file('./').listFiles().sort()
+    files.each {
+        File f ->
+        if (f.isFile()) {
+            println " *** $f.name *** "
+            ant.loadfile(srcFile: f, property: f.name)
+            println "${ant.properties[f.name]}"
+        }
+    }
+}
+
+// Using method to organize your build logic
+task checksum << {
+    filelist("./").each {
+        File file ->
+        ant.checksum(file: file, propery: "cs_$file.name")
+        println "$file.name Checksum: ${ant.properties["cs_$file.name"]}"
+    }
+}
+
+task loadfile1 << {
+    filelist("./").each {
+        File f ->
+        if (f.isFile()) {
+            println " *** $f.name *** "
+            ant.loadfile(srcFile: f, property: f.name)
+            println "${ant.properties[f.name]}"
+        }
+    }
+}
+
+File[] filelist(String dir) {
+    file(dir).listFiles({file -> file.isFile()} as FileFilter).sort()
+}
+
+// Define  default tasks
+defaultTasks 'clean', 'run'
+task clean << {
+    println "Default Cleaning!"
+}
+
+task run << {
+    println "Default Running!"
+}
+
+task other << {
+    println "I'm not a default task!"
+}
+
+// Diffrent outcomes of build depending on chosen tasks
+task distribution << {
+    println "We build the zip with version=$version"
+}
+
+task release(dependsOn: 'distribution') << {
+    println "We release now"
+}
+
+gradle.taskGraph.whenReady {
+    taskGraph -> 
+    if (taskGraph.hasTask(release)) {
+        version = '1.0'
+    } else {
+        version = "1.0-SNAPSHOT"
+    }
+}
+

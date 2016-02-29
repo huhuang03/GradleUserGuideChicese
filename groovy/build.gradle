@@ -1,0 +1,16 @@
+// hello world
+task hello << {
+    println 'Hello world!'
+}
+
+// variable, method in groovy
+task upper << {
+    String someString = "tonghu";
+    println "Original: " + someString
+    println "Uppser case: " + someString.toUpperCase()
+}
+
+// count
+task count << {
+    4.times { print "$it " }
+}
